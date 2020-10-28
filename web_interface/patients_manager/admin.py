@@ -2,8 +2,8 @@ from django.contrib import admin
 # Register your models here.
 from django.utils.html import format_html
 
-from .models import Doctor
-from .models import Patient
+from howru_models.models import Doctor
+from howru_models.models import Patient
 
 
 class DoctorAdmin(admin.ModelAdmin):

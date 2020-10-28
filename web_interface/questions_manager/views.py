@@ -5,7 +5,7 @@ from django.shortcuts import render, redirect
 
 # Create your views here.
 from .forms import QuestionForm
-from .models import Question, PendingQuestion
+from howru_models.models import Question, PendingQuestion
 
 def save_question(form, doctor):
     """
