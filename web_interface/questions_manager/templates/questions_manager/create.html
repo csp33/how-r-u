@@ -1,0 +1,111 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} Questions manager {% endblock %}
+
+{% block content %}
+
+<div class="container-fluid">
+    <div class="fade-in">
+        <div class="col-md-15">
+            <div class="card">
+                <div class="card-header"><strong>Create a new question</strong></div>
+                <div class="card-body">
+                    {% if form.errors %}
+                    {% for field in form %}
+                    {% for error in field.errors %}
+                    <div class="alert alert-danger">
+                        <strong>{{ error|escape }}</strong>
+                    </div>
+                    {% endfor %}
+                    {% endfor %}
+                    {% for error in form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        <strong>{{ error|escape }}</strong>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+                    <form action="/questions_manager/create/" class="form-horizontal" enctype="multipart/form-data"
+                          method="post">
+                        {% csrf_token %}
+                        <div class="form-group row">
+                            <label class="col-md-3 col-form-label" for="text">Question</label>
+                            <div class="col-md-9">
+                                <input class="form-control" id="text" name="text"
+                                       placeholder="How do you feel today?"
+                                       required
+                                       type="text">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-md-3 col-form-label" for="responses_field">Possible responses</label>
+                            <div class="col-md-9">
+                                <textarea class="form-control" id="responses_field" name="responses_field" placeholder="One per line, from bad to good. For example: &#10;Angry&#10;Bored&#10;Happy" required rows="9"></textarea>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-md-3 col-form-label" for="privacy">Privacy</label>
+                            <div class="col-md-9">
+                                <select class="form-control" id="privacy" name="privacy" required>
+                                    <option value="">Please select</option>
+                                    <option value="Public">Public</option>
+                                    <option value="Private">Private</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-md-3 col-form-label" for="language">Language</label>
+                            <div class="col-md-9">
+                                <select class="form-control" id="language" name="language" required>
+                                    <option value="">Please select</option>
+                                    <option value="GB">English</option>
+                                    <option value="ES">Spanish</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-md-3 col-form-label" for="frequency">Frequency</label>
+                            <div class="col-md-9">
+                                <select class="form-control" id="frequency" name="frequency" required>
+                                    <option value="">Please select</option>
+                                    <option value="O">Once</option>
+                                    <option value="D">Daily</option>
+                                    <option value="W">Weekly</option>
+                                    <option value="M">Monthly</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-md-3 col-form-label" for="priority">Priority</label>
+                            <div class="col-md-9">
+                                <input class="form-control" id="priority" min="1" name="priority" type="number"
+                                       value="1">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-md-3 col-form-label" for="to_all">Assigned to all my patients</label>
+                            <div class="col-md-9">
+                                <select class="form-control" id="to_all" name="to_all" required>
+                                    <option value="">Please select</option>
+                                    <option value="yes">Yes</option>
+                                    <option value="no">No</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="text-center">
+                            <button class="btn btn-sm btn-primary" name="login" type="submit">Submit</button>
+                            <button class="btn btn-sm btn-danger" type="reset"> Reset</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% block javascripts %}
+<!-- Specific Page JS goes HERE  -->
+{% endblock javascripts %}
+
+{% endblock content %}
+
