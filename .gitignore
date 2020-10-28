@@ -133,3 +133,4 @@ chatbot/pics/
 core/key.py
 .idea/
 web_interface/staticfiles/
+howru_models/migrations
