@@ -1,0 +1,158 @@
+{% extends "layouts/base.html" %}
+{% load paginate from pagination %}
+{% load get_url from get_search_url %}
+{% block title %} My questions {% endblock %}
+
+{% block content %}
+<style>
+    html, body {
+    max-width: 100%;
+    overflow-x: hidden;
+}
+</style>
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card">
+            {% if success_msg %}
+            <div class="alert alert-success">
+                <strong>{{ success_msg }}</strong>
+            </div>
+            {% endif %}
+            <div class="card-body">
+                <div class="col-md-6" style="margin: 0 auto;float: none;margin-bottom: 10px;">
+                    <form class="form-horizontal">
+                        {% csrf_token %}
+                        <div class="input-group">
+                            <input autocomplete="username" class="form-control" id="search" name="search"
+                                   placeholder="Question text (empty to get all questions)"
+                                   type="search">
+                            <span class="input-group-append">
+                            <button class="btn btn-primary" type="submit">
+                              <svg class="c-icon">
+                                <use xlink:href="/static/assets/vendors/@coreui/icons/svg/free.svg#cil-magnifying-glass"></use>
+                              </svg> Search
+                            </button>
+                            </span>
+                        </div>
+                    </form>
+                </div>
+                {% if questions %}
+                <table class="table table-responsive-sm table-bordered table-striped table-sm" style="margin:10px;">
+                    <thead>
+                    <tr>
+                        <th style="text-align: center; vertical-align: middle;">Question text</th>
+                        <th style="text-align: center; vertical-align: middle;">Possible responses</th>
+                        <th style="text-align: center; vertical-align: middle;">Assigned to all</th>
+                        <th style="text-align: center; vertical-align: middle;">Frequency</th>
+                        <th style="text-align: center; vertical-align: middle;">Priority</th>
+                        <th style="text-align: center; vertical-align: middle;">Privacy</th>
+                        <th style="text-align: center; vertical-align: middle;">Creator</th>
+                        <th style="text-align: center; vertical-align: middle;">Language</th>
+                        <th style="text-align: center; vertical-align: middle;">Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for question in questions %}
+                    <tr>
+                        <td style="text-align: center; vertical-align: middle;">
+                            {{ question.text }}
+                        </td>
+                        <td style="text-align: center; vertical-align: middle;">
+                            {% for response in question.response_set.all %}
+                            {{ response }} <br>
+                            {% endfor %}
+                        </td>
+                        <td style="text-align: center; vertical-align: middle;">
+                            {% if question.assigned_to_all %}
+                            ✔️
+                            {% else %}
+                            ❌
+                            {% endif %}
+                        </td>
+                        <td style="text-align: center; vertical-align: middle;">
+                            {{ question.get_frequency_display }}
+                        </td>
+                        <td style="text-align: center; vertical-align: middle;">
+                            {{ question.priority }}
+                        </td>
+                        <td style="text-align: center; vertical-align: middle;">
+                            {% if question.public %}
+                            <span class="badge badge-success">Public</span>
+                            {% else %}
+                            <span class="badge badge-danger">Private</span>
+                            {% endif %}
+                        </td>
+                        <td style="text-align: center; vertical-align: middle;">
+                            {{ question.creator.user.username }}
+                            {% if question.creator.user.username == request.user.username %}
+                            (You)
+                            {% endif %}
+                        </td>
+                        <td style="text-align: center; vertical-align: middle;">
+                            {% if question.language == "ES" %}
+                            <svg class="c-icon c-icon-xl">
+                                <use xlink:href="/static/assets/vendors/@coreui/icons/svg/flag.svg#cif-es"></use>
+                            </svg>
+                            {% else %}
+                            <svg class="c-icon c-icon-xl">
+                                <use xlink:href="/static/assets/vendors/@coreui/icons/svg/flag.svg#cif-gb"></use>
+                            </svg>
+                            {% endif %}
+                        </td>
+                        <td style="text-align: center; vertical-align: middle;">
+                            <a href="/questions_manager/modify/{{question.id}}">
+                                <button class="btn btn-pill btn-info" style="margin:5px;" type="button">
+                                    &#128221; &nbsp; Modify
+                                </button>
+                            </a>
+                            <a href="/questions_manager/delete/{{question.id}}">
+                                <button class="btn btn-pill btn-warning" style="margin:5px;" type="button">
+                                    &#10060; &nbsp; Delete
+                                </button>
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                {% if questions.has_other_pages %}
+                <ul class="pagination" style="justify-content: center;">
+                    {% if questions.number == 1 %}
+                    <li class="page-item"><a class="page-link disabled">⇤</a></li>
+                    {% else %}
+                    <li class="page-item"><a class="page-link"
+                                             href="?{% get_url request 'page' 1 %}">⇤</a></li>
+                    {% endif %}
+                    {% for i in questions.paginator|paginate:questions.number %}
+                    {% if questions.number == i %}
+                    <li class="page-item active"><a class="page-link" href="#">{{i}}</a></li>
+                    {% else %}
+                    <li class="page-item"><a class="page-link" href="?{% get_url request 'page' i %}">{{ i }}</a></li>
+                    {% endif %}
+                    {% endfor %}
+                    {% if questions.number == questions.paginator.num_pages %}
+                    <li class="page-item"><a class="page-link disabled">⇥</a></li>
+                    {% else %}
+                    <li class="page-item"><a class="page-link"
+                                             href="?{% get_url request 'page' questions.paginator.num_pages %}">⇥</a></li>
+                    {% endif %}
+                </ul>
+                {% endif %}
+                {% endif %}
+                <a href="/questions_manager/create">
+                    <button class="btn btn-pill btn-block btn-primary" type="button">
+                        <svg class="c-icon">
+                            <use xlink:href="/static/assets/vendors/@coreui/icons/svg/free.svg#cil-plus"></use>
+                        </svg>&nbsp;
+                        Create a new question
+                    </button>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block javascripts %}
+<!-- Specific Page JS goes HERE  -->
+{% endblock javascripts %}

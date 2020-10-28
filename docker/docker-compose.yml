@@ -23,7 +23,7 @@ services:
     links:
         - db:db
     volumes:
-      - ~/Documents/how-r-u/web_interface:/opt/web_interface
+      - ..:/opt/web_interface
     ports:
       - "8080:8080"
     depends_on:

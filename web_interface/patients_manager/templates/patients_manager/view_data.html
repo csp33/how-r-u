@@ -1,0 +1,214 @@
+{% extends "layouts/base.html" %}
+{% load paginate from pagination %}
+{% load get_url from get_search_url %}
+{% block title %} Charts {% endblock %}
+
+{% block content %}
+
+<div class="container-fluid">
+    <div class="fade-in">
+        <div class="col-md-12">
+            <h5 style="text-align: center">Answered questions from patient {{ patient }}</h5>
+            <div class="col-md-6" style="margin: 0 auto;float: none;margin-bottom: 10px;">
+                <form class="form-horizontal">
+                    {% csrf_token %}
+                    <div class="input-group">
+                        <input autocomplete="username" class="form-control" id="search" name="search"
+                               placeholder="Question text (empty to get all questions)"
+                               type="search">
+                        <span class="input-group-append">
+                            <button class="btn btn-primary" type="submit">
+                              <svg class="c-icon">
+                                <use xlink:href="/static/assets/vendors/@coreui/icons/svg/free.svg#cil-magnifying-glass"></use>
+                              </svg> Search
+                            </button>
+                            </span>
+                    </div>
+                </form>
+            </div>
+            {% for question in questions %}
+            <div class="card">
+                <div class="card-header text-center">
+                    {{question.question__text}}
+                </div>
+                <div class="card-body" id="cardbody">
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="c-chart-wrapper">
+                                <canvas id="{{question.question}}_bar"></canvas>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="c-chart-wrapper">
+                                <canvas id="{{question.question}}_pie"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            {% if questions.has_other_pages %}
+            <ul class="pagination" style="justify-content: center;">
+                {% if questions.number == 1 %}
+                <li class="page-item"><a class="page-link disabled">⇤</a></li>
+                {% else %}
+                <li class="page-item"><a class="page-link"
+                                         href="?{% get_url request 'page' 1 %}">⇤</a></li>
+                {% endif %}
+                {% for i in questions.paginator|paginate:questions.number %}
+                {% if questions.number == i %}
+                <li class="page-item active"><a class="page-link" href="#">{{i}}</a></li>
+                {% else %}
+                <li class="page-item"><a class="page-link" href="?{% get_url request 'page' i %}">{{ i }}</a></li>
+                {% endif %}
+                {% endfor %}
+                {% if questions.number == questions.paginator.num_pages %}
+                <li class="page-item"><a class="page-link disabled">⇥</a></li>
+                {% else %}
+                <li class="page-item"><a class="page-link"
+                                         href="?{% get_url request 'page' questions.paginator.num_pages %}">⇥</a></li>
+                {% endif %}
+            </ul>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
+
+{% block javascripts %}
+
+<script src="/static/assets/vendors/@coreui/coreui-chartjs/js/coreui-chartjs.bundle.js"></script>
+<script>
+{% for question, question_data in list_of_questions.items %}
+    responses_json = {{question_data.pie_data | safe}};
+    dates_json = {{question_data.line_data | safe}};
+    // Variables creation
+    tmp_responses = [];
+    values = [];
+    data = [];
+    responses = [];
+    values = [];
+    for (let r in responses_json) {
+        tmp_responses.push(responses_json[r]);
+        values.push(responses_json[r]['n']);
+    }
+    tmp_responses.sort((a, b) => (a['response__order'] > b['response__order']) ? 1 : -1)
+    responses = [];
+    for (let r in tmp_responses) {
+        responses.push(tmp_responses[r]['response__text']);
+    }
+    dates = [];
+    for (let r in dates_json) {
+        dates.push(dates_json[r]['date']);
+    }
+
+    //dates = Object.keys(dates_json);
+    for (let r in dates_json) {
+        data.push({
+            x: dates.indexOf(dates_json[r]['date']),
+            y: responses.indexOf(dates_json[r]['response__text'])
+        });
+    }
+
+    /***************** Bar chart *************************/
+
+    new Chart(document.getElementById('{{question}}_bar'), {
+        type: 'line',
+        data: {
+            xLabels: dates,
+            yLabels: responses,
+            datasets: [{
+                backgroundColor: 'rgba(1, 249, 31, 0.5)',
+                borderColor: 'rgba(0, 0, 0, 0.5)',
+                highlightFill: 'rgba(47, 0, 253, 0.5)',
+                highlightStroke: 'rgba(220, 220, 220, 0.5)',
+                data: data
+            }]
+        },
+        options: {
+            tooltips: {
+                callbacks: {
+                    label: function(tooltipItem, data) {
+                        return null;
+                    },
+                    title: function(tooltipItem, data) {
+                        return dates[tooltipItem[0].xLabel]
+                    },
+                }
+            },
+            legend: {
+                "display": false
+            },
+            responsive: true,
+            scales: {
+                xAxes: [{
+                    type: 'linear',
+                    position: 'bottom',
+                    scaleLabel: {
+                        display: true,
+                        labelString: 'Date'
+                    },
+                    ticks: {
+                        min: 0,
+                        max: dates.length,
+                        maxTicksLimit: 20,
+                        stepSize: 1,
+                        callback: function(value) {
+                            return dates[value];
+                        },
+                    },
+                }],
+                yAxes: [{
+                    scaleLabel: {
+                        display: true,
+                        labelString: 'Answer'
+                    },
+                    ticks: {
+                        min: 0,
+                        max: responses.length - 1,
+                        callback: function(value) {
+                            return responses[value];
+                        },
+                    },
+                }],
+            },
+            animation: {
+                easing: 'easeOutBack',
+            },
+        }
+    });
+
+    /***************** Pie chart *************************/
+
+    var colors = ['#FF6384', '#36A2EB', '#FFCE56', '#c77de7'];
+    if (colors.length < values.length) {
+        for (i = 0; i < values.length - colors.length + 1; i++) {
+            colors.push('#'+(Math.random()*0xFFFFFF<<0).toString(16));
+        }
+    }
+    new Chart(document.getElementById('{{question}}_pie'), {
+        type: 'pie',
+        data: {
+            labels: responses,
+            datasets: [{
+                data: values,
+                backgroundColor: colors,
+                hoverBackgroundColor: colors
+            }]
+        },
+        options: {
+            responsive: true,
+            animation: {
+                easing: 'easeOutBack',
+            },
+        },
+    });
+{% endfor %}
+
+
+
+
+</script>
+
+{% endblock javascripts %}

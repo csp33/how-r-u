@@ -2,7 +2,6 @@ from datetime import datetime
 
 import pytz
 
-from chatbot.log.logger import logger
 
 
 def get_utc_result(value, timezone='Europe/Madrid'):
@@ -13,7 +12,6 @@ def get_utc_result(value, timezone='Europe/Madrid'):
     # Add timezone
     timezone = pytz.timezone(timezone)
     result = timezone.localize(dt)
-    logger.info("el result %s", result)
     return result
 
 
