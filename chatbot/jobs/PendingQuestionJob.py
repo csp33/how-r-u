@@ -18,9 +18,12 @@ def was_configurator_running(patient_id, context):
     all_hand = context.dispatcher.handlers
     for dict_group in all_hand:
         for handler in all_hand[dict_group]:
-            if isinstance(handler, ConversationHandler) and handler.name == "configurator" and str(
-                    list(handler.conversations)[0][0]) == patient_id:
-                return True
+            try:
+                if isinstance(handler, ConversationHandler) and handler.name == "configurator" and str(
+                        list(handler.conversations)[0][0]) == patient_id:
+                    return True
+            except IndexError:
+                continue
     return False
 
 
