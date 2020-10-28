@@ -1,0 +1,179 @@
+{% extends "layouts/base.html" %}
+{% load get_latest_answer_time from templatetags %}
+{% load get_assigned_questions from templatetags %}
+{% load get_number_of_assigned_questions from templatetags %}
+{% load paginate from pagination %}
+{% load get_url from get_search_url %}
+{% block title %} Patients Manager {% endblock %}
+
+{% block content %}
+<style>
+    html, body {
+    max-width: 100%;
+    overflow-x: hidden;
+}
+</style>
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card">
+            {% if success_msg %}
+            <div class="alert alert-success">
+                <strong>{{ success_msg }}</strong>
+            </div>
+            {% endif %}
+            <div class="card-body">
+                <a href="export/">
+                    <button class="btn btn-pill btn-primary" style="float: right;" type="button">
+                        <svg class="c-icon">
+                            <use xlink:href="/static/assets/vendors/@coreui/icons/svg/free.svg#cil-save"></use>
+                        </svg>
+                        &nbsp; Export
+                    </button>
+                </a>
+                <div class="col-md-6" style="margin: 0 auto;float: none;margin-bottom: 10px;">
+                    <form class="form-horizontal">
+                        {% csrf_token %}
+                        <div class="input-group">
+                            <input autocomplete="username" class="form-control" id="search" name="search"
+                                   placeholder="Patient username (empty to get all patients)"
+                                   type="search">
+                            <span class="input-group-append">
+                            <button class="btn btn-primary" type="submit">
+                              <svg class="c-icon">
+                                <use xlink:href="/static/assets/vendors/@coreui/icons/svg/free.svg#cil-magnifying-glass"></use>
+                              </svg> Search
+                            </button>
+                            </span>
+                        </div>
+                    </form>
+                </div>
+                {% if patients %}
+
+                <table class="table table-responsive-sm table-bordered table-striped table-sm">
+                    <thead>
+                    <tr>
+                        <th style="text-align: center; vertical-align: middle;">
+                            <svg class="c-icon">
+                                <use xlink:href="/static/assets/vendors/@coreui/icons/svg/free.svg#cil-face"></use>
+                            </svg>
+                        </th>
+                        <th style="text-align: center; vertical-align: middle;">Name</th>
+                        <th style="text-align: center; vertical-align: middle;">Username</th>
+                        <th style="text-align: center; vertical-align: middle;">Language</th>
+                        <th style="text-align: center; vertical-align: middle;">Gender</th>
+                        <th style="text-align: center; vertical-align: middle;">Assigned questions</th>
+                        <th style="text-align: center; vertical-align: middle;">Last answer</th>
+                        <th style="text-align: center; vertical-align: middle;">Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for patient in patients %}
+                    <tr>
+                        <td style="text-align: center; vertical-align: middle;">
+                            <img height="60" src="data:image/png;base64,{{ patient.picture}}"
+                                 style="border-radius: 50%;"
+                                 width="50">
+                        </td>
+                        <td style="text-align: center; vertical-align: middle;">
+                            {{ patient.name }}
+                        </td>
+                        <td style="text-align: center; vertical-align: middle;">
+                            {{ patient.username }}
+                        </td>
+                        <td style="text-align: center; vertical-align: middle;">
+                            {% if patient.language == "ES" %}
+                            <svg class="c-icon c-icon-xl">
+                                <use xlink:href="/static/assets/vendors/@coreui/icons/svg/flag.svg#cif-es"></use>
+                            </svg>
+                            {% else %}
+                            <svg class="c-icon c-icon-xl">
+                                <use xlink:href="/static/assets/vendors/@coreui/icons/svg/flag.svg#cif-gb"></use>
+                            </svg>
+                            {% endif %}
+                        </td>
+                        <td style="text-align: center; vertical-align: middle;">
+                            {{ patient.get__gender_display }}
+                        </td>
+                        <td style="text-align: center; vertical-align: middle;">
+                            {% if patient|get_assigned_questions:request.user.doctor %}
+                            <a aria-controls="show_questions" aria-expanded="false" class="btn btn-pill btn-secondary"
+                               data-toggle="collapse" href="#show_questions_{{patient}}">Show
+                                ({{ patient|get_number_of_assigned_questions:request.user.doctor }})</a>
+                            <div class="collapse" id="show_questions_{{patient}}">
+                                <div class="card card-body">
+                                    {% for question in patient|get_assigned_questions:request.user.doctor %}
+                                    {{ question.question }}
+                                    <br>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% else %}
+                            -
+                            {% endif %}
+                        </td>
+                        <td style="text-align: center; vertical-align: middle;">
+                            {{ patient|get_latest_answer_time }}
+                        </td>
+                        <td style="text-align: center; vertical-align: middle;">
+                            <a href="/patients_manager/view_data/{{patient.identifier}}/">
+                                <button class="btn btn-pill btn-success" type="button">
+                                    📊 &nbsp; View data
+                                </button>
+                            </a>
+                            <br>
+                            <a href="/patients_manager/assign_questions/{{patient.identifier}}/">
+                                <button class="btn btn-pill btn-info" style="margin:5px;" type="button">
+                                    &#128172; &nbsp; Assign questions
+                                </button>
+                            </a>
+                            <a href="/patients_manager/unassign/{{patient.identifier}}/">
+                                <button class="btn btn-pill btn-warning" style="margin:5px;" type="button">
+                                    &#10060; &nbsp; Delete patient
+                                </button>
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                {% if patients.has_other_pages %}
+                <ul class="pagination" style="justify-content: center;">
+                    {% if patients.number == 1 %}
+                    <li class="page-item"><a class="page-link disabled">⇤</a></li>
+                    {% else %}
+                    <li class="page-item"><a class="page-link"
+                                             href="?{% get_url request 'page' 1 %}">⇤</a></li>
+                    {% endif %}
+                    {% for i in patients.paginator|paginate:patients.number %}
+                    {% if patients.number == i %}
+                    <li class="page-item active"><a class="page-link" href="#">{{i}}</a></li>
+                    {% else %}
+                    <li class="page-item"><a class="page-link" href="?{% get_url request 'page' i %}">{{ i }}</a></li>
+                    {% endif %}
+                    {% endfor %}
+                    {% if patients.number == patients.paginator.num_pages %}
+                    <li class="page-item"><a class="page-link disabled">⇥</a></li>
+                    {% else %}
+                    <li class="page-item"><a class="page-link"
+                                             href="?{% get_url request 'page' patients.paginator.num_pages %}">⇥</a></li>
+                    {% endif %}
+                </ul>
+                {% endif %}
+                {% endif %}
+                <a href="/patients_manager/assign">
+                    <button class="btn btn-pill btn-block btn-primary" type="button">
+                        <svg class="c-icon">
+                            <use xlink:href="/static/assets/vendors/@coreui/icons/svg/free.svg#cil-plus"></use>
+                        </svg>&nbsp;
+                        Add a new patient
+                    </button>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block javascripts %}
+<!-- Specific Page JS goes HERE  -->
+{% endblock javascripts %}

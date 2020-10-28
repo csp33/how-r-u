@@ -1,0 +1,40 @@
+{% extends "layouts/base.html" %}
+{% block title %} Patients Manager {% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-5" style="margin: 0 auto;float: none;margin-bottom: 10px;">
+        <div class="card">
+            {% if not_found %}
+            <div class="alert alert-danger">
+                <strong>Patient username not found</strong>
+            </div>
+            {% endif %}
+            <div class="card-body">
+                <div class="col-md-12">
+                    <form action="/patients_manager/assign/" class="form-horizontal"
+                          enctype="multipart/form-data"
+                          method="post">
+                        {% csrf_token %}
+                        <div class="input-group">
+                            <input autocomplete="username" class="form-control" id="username" name="username"
+                                   placeholder="Username" required type="text">
+                            <span class="input-group-append">
+                            <button class="btn btn-primary" type="submit">
+                              <svg class="c-icon">
+                                <use xlink:href="/static/assets/vendors/@coreui/icons/svg/free.svg#cil-smile-plus"></use>
+                              </svg> Add
+                            </button>
+                            </span>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block javascripts %}
+<!-- Specific Page JS goes HERE  -->
+{% endblock javascripts %}
