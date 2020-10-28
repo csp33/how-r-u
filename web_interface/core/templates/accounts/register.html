@@ -1,0 +1,97 @@
+{% extends "layouts/base-fullscreen.html" %}
+
+{% block title %} Login {% endblock %}
+
+{% block content %}
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card mx-4">
+
+            <form action="" method="post" role="form">
+
+                {% csrf_token %}
+
+                <div class="card-body p-4">
+
+                    <div class="text-center">
+
+                        <h2>
+                            HOW-R-U Dashboard
+                        </h2>
+                        <h5>Register</h5>
+                        {% if form.errors %}
+                        {% for field in form %}
+                        {% for error in field.errors %}
+                        <div class="alert alert-danger">
+                            <strong>{{ error|escape }}</strong>
+                        </div>
+                        {% endfor %}
+                        {% endfor %}
+                        {% for error in form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            <strong>{{ error|escape }}</strong>
+                        </div>
+                        {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <br/>
+
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend"><span class="input-group-text">
+                    <svg class="c-icon">
+                      <use xlink:href="/static/assets/vendors/@coreui/icons/svg/free.svg#cil-user"></use>
+                    </svg></span></div>
+                        {{ form.username }}
+                    </div>
+
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend"><span class="input-group-text">
+                    <svg class="c-icon">
+                      <use xlink:href="/static/assets/vendors/@coreui/icons/svg/free.svg#cil-lock-locked"></use>
+                    </svg></span></div>
+                        {{ form.password1 }}
+                    </div>
+
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend"><span class="input-group-text">
+                    <svg class="c-icon">
+                      <use xlink:href="/static/assets/vendors/@coreui/icons/svg/free.svg#cil-lock-locked"></use>
+                    </svg></span></div>
+                        {{ form.password2 }}
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-md-3 col-form-label" for="data_analyst">Data analyst</label>
+                        <div class="col-md-9">
+                            <select class="form-control" id="data_analyst" name="data_analyst" required>
+                                <option value="">Please select</option>
+                                <option value="yes">Yes</option>
+                                <option value="no">No</option>
+                            </select>
+
+                        </div>
+                        <span class="help-block" style="margin-top: 10px; width: 100%;text-align: center">
+                                A data analyst automatically has all the system patients assigned to its account
+                        </span>
+                    </div>
+
+                    <br/>
+
+                    <div class="text-center">
+                        <button class="btn btn-primary px-4" name="register" type="submit">Register</button>
+                    </div>
+
+                </div>
+
+            </form>
+
+            <div class="card-footer p-4 text-center">
+                Have an account? <a href={% url 'login' %} >Login</a>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+{% endblock content %}

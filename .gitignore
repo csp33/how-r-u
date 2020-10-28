@@ -132,3 +132,4 @@ chatbot/config/bot_config.py
 chatbot/pics/
 core/key.py
 .idea/
+web_interface/staticfiles/
