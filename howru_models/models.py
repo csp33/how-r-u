@@ -14,8 +14,10 @@ class Response(models.Model):
     text = models.CharField(max_length=100)
     order = models.IntegerField(null=False)
     question = models.ForeignKey('Question', on_delete=models.CASCADE)
+
     def __str__(self):
         return self.text
+
 
 class Question(models.Model):
     text = models.CharField(max_length=100)
@@ -65,6 +67,12 @@ class Patient(models.Model):
     )
     assigned_doctors = models.ManyToManyField(Doctor, blank=True)
 
+    GENDER_MAPPING = {
+        "M": {"ES": "Masculino", "GB": "Male"},
+        "F": {"ES": "Femenino", "GB": "Female"},
+        "O": {"ES": "Otro", "GB": "Other"},
+    }
+
     def __str__(self):
         return self.username
 
@@ -87,12 +95,7 @@ class Patient(models.Model):
 
     @property
     def gender(self):
-        GENDER_MAPPING = {
-            "M": {"ES": "Masculino", "GB": "Male"},
-            "F": {"ES": "Femenino", "GB": "Female"},
-            "O": {"ES": "Otro", "GB": "Other"},
-        }
-        return GENDER_MAPPING[self._gender][self.language]
+        return self.GENDER_MAPPING[self._gender][self.language]
 
     @gender.setter
     def gender(self, value):
@@ -124,6 +127,7 @@ class PendingQuestion(JournalEntry):
 class AnsweredQuestion(JournalEntry):
     answer_date = models.DateTimeField()
     response = models.ForeignKey(Response, on_delete=models.CASCADE)
+
     def __str__(self):
         base = str(super())
         return f'{base} - {self.response} - {self.answer_date}'
