@@ -86,11 +86,11 @@ class Patient(models.Model):
 
     @property
     def schedule(self):
-        return UTCTime.to_locale(self._schedule)
+        return self._schedule
 
     @schedule.setter
     def schedule(self, value):
-        utc_result = UTCTime.get_utc_result(value)
+        utc_result = UTCTime.str_to_localized_datetime(value)
         self._schedule = utc_result
 
     @property

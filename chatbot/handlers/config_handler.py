@@ -195,7 +195,7 @@ def ask_change_schedule(update, context):
     """
     patient = context.user_data['patient']
     logger.info(f'User {update.message.from_user.username} asked to change schedule')
-    schedule_dt = UTCTime.to_locale(patient.schedule)
+    schedule_dt = patient.schedule
     schedule = schedule_dt.strftime("%H:%M")
     update.message.reply_text(messages[patient.language]['current_schedule'] + schedule)
     update.message.reply_text(messages[patient.language]['change_schedule'], reply_markup=ReplyKeyboardRemove())
@@ -209,19 +209,27 @@ def process_change_schedule(update, context):
     Saves the new schedule, deletes previous jobs and creates updated ones.
     """
     patient = context.user_data['patient']
+
+    # Get new schedule from msg
     new_schedule = update.message.text
-    new_schedule_dt = UTCTime.get_utc_result(new_schedule)
+    new_schedule_dt = UTCTime.str_to_localized_datetime(new_schedule)
+
+    # Set it
     patient.schedule = new_schedule
     patient.save(update_fields=['_schedule'])
+
+    # Remove old job and create a new one with the new schedule
     for old_job in context.job_queue.get_jobs_by_name(f'{update.message.from_user.id}_pending_questions_job'):
         old_job.schedule_removal()
     PendingQuestionJob(context, patient)
+
     logger.info(f'User {update.message.from_user.username} changed schedule to {patient.schedule}')
     update.message.reply_text(messages[patient.language]['schedule_updated'])
-    now = datetime.utcnow()
+
     # If the time is less than the actual time, question job will start (it will show config menu when patient finishes
     # answering). Otherwise, show config menu
-    if new_schedule_dt.time() > now.time():
+    
+    if new_schedule_dt.time() > datetime.utcnow().time():
         return config_menu(update, context)
     else:
         return CHOOSING
