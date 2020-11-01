@@ -59,7 +59,7 @@ class PendingQuestionJob(object):
 
     def _create_job(self, context):
         context.job_queue.run_daily(callback=self.job_callback,
-                                    time=self.patient.schedule,
+                                    time=self.patient._schedule,
                                     name=f'{self.patient.identifier}_pending_questions_job')
 
     @staticmethod
