@@ -8,7 +8,7 @@ import chatbot.keyboards as keyboards
 import manage
 from chatbot.jobs.PendingQuestionJob import PendingQuestionJob
 from django.contrib.auth.models import User
-from howru_models.models import Patient ,PendingQuestion, Doctor
+from howru_models.models import Patient, PendingQuestion, Doctor
 from howru_helpers import Flag
 
 GENDER, PICTURE, LANGUAGE, SCHEDULE = range(4)
@@ -46,10 +46,10 @@ def language(update, context):
     """
     Processes language and asks for gender
     """
-    language = update.message.text
+    patient_language = update.message.text
     patient = context.user_data['patient']
-    logger.info(f'User {update.message.from_user.username} chose language {language}')
-    context.user_data['patient'].language = Flag.unflag(language)
+    logger.info(f'User {update.message.from_user.username} chose language {patient_language}')
+    context.user_data['patient'].language = Flag.unflag(patient_language)
     update.message.reply_text(text=messages[patient.language]['choose_gender'],
                               reply_markup=keyboards.gender_keyboard[patient.language])
     return GENDER
@@ -101,10 +101,10 @@ def schedule(update, context):
     """
     Processes schedule and calls finish() method
     """
-    schedule = update.message.text
+    patient_schedule = update.message.text
     patient = context.user_data['patient']
-    logger.info(f'User {update.message.from_user.username} chose schedule {schedule}')
-    patient.schedule = schedule
+    logger.info(f'User {update.message.from_user.username} chose schedule {patient_schedule}')
+    patient.schedule = patient_schedule
     return finish(update, context)
 
 
@@ -130,7 +130,7 @@ def finish(update, context):
                                                    answering=False)
                 pending_question.save()
         logger.info("Patient %s assigned to data_analysts", patient.username)
-    except:
+    except Exception:
         logger.exception("Exception while adding patient %s to data_analysts.", patient.username)
     update.message.reply_text(messages[patient.language]['registration_ok'])
     logger.info(f'Creating pending_questions job for user {update.message.from_user.username}')

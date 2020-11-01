@@ -8,7 +8,8 @@ messages = {
         "choose_schedule": "Por favor elige la hora a la que quieres recibir las preguntas en formato HH:MM (24h)",
         "registration_ok": "Te has registrado correctamente en el sistema.",
         "exit_configurator": "Saliendo del menú de configuración...",
-        "select_config": "Elige la configuración que deseas cambiar. Puedes pulsar /cancel en cualquier momento para volver atrás o /exit para salir.",
+        "select_config": "Elige la configuración que deseas cambiar. Puedes pulsar /cancel en cualquier momento para "
+                         "volver atrás o /exit para salir.",
         "change_picture": "Envía la nueva foto:",
         "current_picture": "Tu foto de perfil actual es la siguiente:",
         "picture_updated": "La imagen de perfil se ha actualizado.",
@@ -55,8 +56,10 @@ messages = {
         "change_schedule": new_template.format('schedule'),
         "schedule_updated": updated_template.format('schedule'),
         "no_questions": "There are no questions for today. See you tomorrow!",
-        "show_profile": "These are your profile data:\n<b>Name</b>: {}\n<b>Gender</b>: {}\n<b>Language</b>: {}\n<b>Schedule</b>: {}",
-        "delete_user": "Are you sure you want to delete your user?\nYou can still press /cancel to go to the previous menu or /exit to leave the configuration.",
+        "show_profile": "These are your profile data:\n<b>Name</b>: {}\n<b>Gender</b>: {}\n<b>Language</b>: {"
+                        "}\n<b>Schedule</b>: {}",
+        "delete_user": "Are you sure you want to delete your user?\nYou can still press /cancel to go to the previous "
+                       "menu or /exit to leave the configuration.",
         "deleted_user": "Your user has been deleted. Press the button below to register again.",
         "finish_answering": "You finished answering today's questions. Thanks!"
     }
