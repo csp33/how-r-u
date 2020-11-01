@@ -18,6 +18,7 @@ from howru_models.models import Patient
 PROCESS_PROFILE_PIC, PROCESS_NAME, PROCESS_GENDER, CHOOSING, PROCESS_LANGUAGE, PROCESS_DELETE_USER, PROCESS_SCHEDULE = \
     range(7)
 
+
 @send_typing_action
 def config_menu(update, context):
     """
@@ -29,16 +30,16 @@ def config_menu(update, context):
                              reply_markup=keyboards.config_keyboard[patient.language])
     return CHOOSING
 
+
 @send_typing_action
 def config(update, context):
     """
-    Starts the configurator and checks wether the user is registered or not.
+    Starts the configurator and checks whether the user is registered or not.
     """
-    context.user_data['patient'] = Patient.objects.get(identifier=update.message.from_user.id)
     logger.info(f'User {update.message.from_user.username} started the configurator')
     try:
         context.user_data['patient'] = Patient.objects.get(identifier=update.message.from_user.id)
-    except Exception:
+    except Patient.DoesNotExist:
         logger.info(
             f'User {update.message.from_user.username} tried to start the configurator but was not registered')
         update.message.reply_text('You must register first by clicking /start\n'
@@ -46,6 +47,7 @@ def config(update, context):
                                   reply_markup=ReplyKeyboardRemove())
         return ConversationHandler.END
     return config_menu(update, context)
+
 
 @send_upload_photo_action
 def ask_profile_pic(update, context):
@@ -80,6 +82,7 @@ def process_profile_pic(update, context):
                               reply_markup=ReplyKeyboardRemove())
     return config_menu(update, context)
 
+
 @send_typing_action
 def ask_change_name(update, context):
     """
@@ -105,6 +108,7 @@ def process_name(update, context):
     logger.info(f'User {update.message.from_user.username} old name {old_name} changed name to {name}')
     update.message.reply_text(messages[patient.language]['name_updated'])
     return config_menu(update, context)
+
 
 @send_typing_action
 def ask_change_gender(update, context):
@@ -132,6 +136,7 @@ def process_gender(update, context):
     update.message.reply_text(messages[patient.language]['gender_updated'])
     return config_menu(update, context)
 
+
 @send_typing_action
 def ask_change_language(update, context):
     """
@@ -157,6 +162,7 @@ def process_language(update, context):
     update.message.reply_text(messages[patient.language]['language_updated'])
     return config_menu(update, context)
 
+
 @send_typing_action
 def view_profile(update, context):
     """
@@ -169,6 +175,7 @@ def view_profile(update, context):
     update.message.reply_text(message, parse_mode=ParseMode.HTML)
     return config_menu(update, context)
 
+
 @send_typing_action
 def ask_delete_user(update, context):
     """
@@ -179,6 +186,7 @@ def ask_delete_user(update, context):
     update.message.reply_text(messages[patient.language]['delete_user'],
                               reply_markup=keyboards.delete_user_keyboard[patient.language])
     return PROCESS_DELETE_USER
+
 
 @send_typing_action
 def ask_change_schedule(update, context):
@@ -192,6 +200,7 @@ def ask_change_schedule(update, context):
     update.message.reply_text(messages[patient.language]['current_schedule'] + schedule)
     update.message.reply_text(messages[patient.language]['change_schedule'], reply_markup=ReplyKeyboardRemove())
     return PROCESS_SCHEDULE
+
 
 @send_typing_action
 @run_async
@@ -217,6 +226,7 @@ def process_change_schedule(update, context):
     else:
         return CHOOSING
 
+
 @send_typing_action
 @run_async
 def process_delete_user(update, context):
@@ -230,6 +240,7 @@ def process_delete_user(update, context):
                               reply_markup=keyboards.start_keyboard)
     return ConversationHandler.END
 
+
 @send_typing_action
 def cancel(update, context):
     """
@@ -238,6 +249,7 @@ def cancel(update, context):
     logger.info(
         f'User {update.message.from_user.username} cancelled current operation.')
     return config_menu(update, context)
+
 
 @send_typing_action
 def _exit(update, context):
