@@ -100,16 +100,24 @@
                             {% endif %}
                         </td>
                         <td style="text-align: center; vertical-align: middle;">
-                            <a href="/questions_manager/modify/{{question.id}}">
-                                <button class="btn btn-pill btn-info" style="margin:5px;" type="button">
-                                    &#128221; &nbsp; Modify
-                                </button>
-                            </a>
-                            <a href="/questions_manager/delete/{{question.id}}">
-                                <button class="btn btn-pill btn-warning" style="margin:5px;" type="button">
-                                    &#10060; &nbsp; Delete
-                                </button>
-                            </a>
+                            {% if question.creator.user.username != request.user.username %}
+                                <a href="/questions_manager/delete/{{question.id}}">
+                                    <button class="btn btn-pill btn-warning" style="margin:5px;" type="button">
+                                        &#10060; &nbsp; Delete from my questions
+                                    </button>
+                                </a>
+                            {% else %}
+                                <a href="/questions_manager/modify/{{question.id}}">
+                                    <button class="btn btn-pill btn-info" style="margin:5px;" type="button">
+                                        &#128221; &nbsp; Modify
+                                    </button>
+                                </a>
+                                <a href="/questions_manager/delete/{{question.id}}">
+                                    <button class="btn btn-pill btn-warning" style="margin:5px;" type="button">
+                                        &#10060; &nbsp; Delete
+                                    </button>
+                                </a>
+                            {% endif %}
                         </td>
                     </tr>
                     {% endfor %}
