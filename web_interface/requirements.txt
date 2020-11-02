@@ -44,6 +44,7 @@ six==1.14.0
 sqlparse==0.4.1
 tornado==6.0.4
 traitlets==4.3.3
+timezonefinder==4.4.1
 tzlocal==2.1
 ujson==4.0.1
 urllib3==1.25.8

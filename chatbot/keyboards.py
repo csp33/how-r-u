@@ -34,6 +34,25 @@ gender_keyboard = {
     ]
     )
 }
+
+send_location_keyboard = {
+    'ES': InlineKeyboardMarkup([
+        [
+            InlineKeyboardButton("📍 Usar la zona horaria por defecto (Europa/Madrid)",
+                                 callback_data="default-timezone")
+        ]
+    ]
+    ),
+
+    'GB': InlineKeyboardMarkup([
+        [
+            InlineKeyboardButton("📍 Use the default timezone (Europa/Madrid)",
+                                 callback_data="default-timezone")
+        ]
+    ]
+    )
+}
+
 language_keyboard = InlineKeyboardMarkup([
     [
         InlineKeyboardButton("🇪🇸", callback_data="ES"),
@@ -115,6 +134,9 @@ config_keyboard = {
             InlineKeyboardButton("🖼️ Cambiar imagen de perfil", callback_data="changepic"),
         ],
         [
+            InlineKeyboardButton("📍 Cambiar zona horaria", callback_data="changetimezone")
+        ],
+        [
             InlineKeyboardButton("🔤 Cambiar nombre", callback_data="changename"),
             InlineKeyboardButton("🌈 Cambiar género", callback_data="changegender")
         ],
@@ -134,6 +156,9 @@ config_keyboard = {
     'GB': InlineKeyboardMarkup([
         [
             InlineKeyboardButton("🖼️ Change profile picture", callback_data="changepic"),
+        ],
+        [
+            InlineKeyboardButton("📍 Change timezone", callback_data="changetimezone")
         ],
         [
             InlineKeyboardButton("🔤 Change name", callback_data="changename"),
