@@ -1,23 +1,21 @@
 import base64
 import os
-from datetime import datetime
 
 from telegram import ReplyKeyboardRemove, ParseMode
 from telegram.ext import ConversationHandler, CommandHandler, MessageHandler, Filters, run_async, CallbackQueryHandler
 
-from chatbot.config.messages import messages
-from chatbot.filters.IsAnsweringFilter import is_answering_filter
-from chatbot.handlers import send_typing_action, send_upload_photo_action
-from howru_helpers import UTCTime
-from chatbot.jobs.PendingQuestionJob import PendingQuestionJob
-from chatbot.log.logger import logger
 import chatbot.keyboards as keyboards
 # noinspection PyUnresolvedReferences
 import manage
+from chatbot.config.messages import messages
+from chatbot.filters.IsAnsweringFilter import is_answering_filter
+from chatbot.handlers import send_typing_action, send_upload_photo_action
+from chatbot.jobs.PendingQuestionJob import PendingQuestionJob
+from chatbot.log.logger import logger
 from howru_models.models import Patient
 
-PROCESS_PROFILE_PIC, PROCESS_NAME, PROCESS_GENDER, CHOOSING, PROCESS_LANGUAGE, PROCESS_DELETE_USER, PROCESS_SCHEDULE = \
-    range(7)
+PROCESS_PROFILE_PIC, PROCESS_NAME, PROCESS_GENDER, CHOOSING, PROCESS_LANGUAGE, PROCESS_DELETE_USER, PROCESS_SCHEDULE, \
+PROCESS_TIMEZONE = range(8)
 
 
 # noinspection PyUnusedLocal
@@ -220,7 +218,6 @@ def ask_change_schedule(update, context):
     """
     Sends old schedule to the user and asks for the new one
     """
-    # TODO horario cuando se reinicia el bot
     update.callback_query.answer()
     patient = context.user_data['patient']
     logger.info(f'User {patient.username} asked to change schedule')
@@ -239,11 +236,8 @@ def process_change_schedule(update, context):
     """
     patient = context.user_data['patient']
 
-    # Get new schedule from msg
+    # Get new schedule from msg and set it
     new_schedule = update.message.text
-    new_schedule_dt = UTCTime.str_to_localized_datetime(new_schedule)
-
-    # Set it
     patient.schedule = new_schedule
     patient.save(update_fields=['_schedule'])
 
@@ -254,6 +248,51 @@ def process_change_schedule(update, context):
 
     logger.info(f'User {patient.username} changed schedule to {patient.schedule}')
     context.bot.send_message(chat_id=patient.identifier, text=messages[patient.language]['schedule_updated'])
+
+    return config_menu(update, context)
+
+
+@send_typing_action
+def process_wrong_schedule(update, context):
+    """
+    Informs that the patient introduced a wrong schedule
+    """
+    patient = context.user_data['patient']
+    text = update.message.text
+    logger.info(f'User {patient.username} introduced an invalid schedule ({text})')
+    context.bot.send_message(chat_id=patient.identifier,
+                             text=messages[patient.language]['invalid_schedule'].format(text),
+                             reply_markup=keyboards.back_keyboard[patient.language])
+
+    return PROCESS_SCHEDULE
+
+
+@send_typing_action
+def ask_change_timezone(update, context):
+    """
+    Asks a patient to change his timezone
+    """
+    update.callback_query.answer()
+    patient = context.user_data['patient']
+    logger.info(f'User {patient.username} asked to change timezone')
+    current_timezone = patient.timezone
+    context.bot.send_message(chat_id=patient.identifier,
+                             text=messages[patient.language]['current_timezone'] + current_timezone)
+    context.bot.send_message(chat_id=patient.identifier, text=messages[patient.language]['change_timezone'],
+                             reply_markup=keyboards.back_keyboard[patient.language])
+    return PROCESS_TIMEZONE
+
+
+@send_typing_action
+def process_change_timezone(update, context):
+    """
+    Calculates timezone from the provided location and sets it
+    """
+    patient = context.user_data['patient']
+    patient_timezone = Patient.get_timezone_from_location(update.message.location)
+
+    logger.info(f'User {patient.username} choose timezone {patient_timezone}')
+    context.bot.send_message(chat_id=patient.identifier, text=messages[patient.language]['timezone_updated'])
 
     return config_menu(update, context)
 
@@ -314,6 +353,7 @@ config_handler = ConversationHandler(
         CHOOSING: [
             CallbackQueryHandler(ask_profile_pic, pattern="^changepic$"),
             CallbackQueryHandler(ask_change_name, pattern="^changename$"),
+            CallbackQueryHandler(ask_change_timezone, pattern="^changetimezone$"),
             CallbackQueryHandler(ask_change_gender, pattern="^changegender$"),
             CallbackQueryHandler(ask_change_schedule, pattern="^changeschedule"),
             CallbackQueryHandler(ask_change_language, pattern="^changelanguage$"),
@@ -336,7 +376,11 @@ config_handler = ConversationHandler(
             CallbackQueryHandler(process_delete_user, pattern="^deleteuser$")
         ],
         PROCESS_SCHEDULE: [
-            MessageHandler(Filters.regex('^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$'), process_change_schedule)
+            MessageHandler(Filters.regex('^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$'), process_change_schedule),
+            MessageHandler(~Filters.regex('^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$'), process_wrong_schedule)
+        ],
+        PROCESS_TIMEZONE: [
+            MessageHandler(Filters.location, process_change_timezone)
         ]
 
     },

@@ -5,6 +5,7 @@ messages = {
     "ES": {
         "choose_gender": "Por favor escoge tu género:",
         "choose_pic": "Por favor, envía una foto tuya",
+        "choose_timezone": "Por favor, envía tu ubicación para que se detecte tu zona horaria",
         "choose_schedule": "Por favor elige la hora a la que quieres recibir las preguntas en formato HH:MM (24h)",
         "registration_ok": "Te has registrado correctamente en el sistema.",
         "exit_configurator": "Se ha cerrado el configurador.\nUsa /config para abrirlo de nuevo.",
@@ -19,6 +20,9 @@ messages = {
         "current_gender": "Tu género actual es ",
         "change_gender": "Introduce tu nuevo género:",
         "gender_updated": "Tu género se ha actualizado.",
+        "current_timezone": "Tu zona horaria actual es ",
+        "change_timezone": "Envía tu ubicación para detectar tu nueva zona horaria:",
+        "timezone_updated": "Tu zona horaria se ha actualizado.",
         "current_schedule": "Tu horario actual es ",
         "change_schedule": "Introduce tu nuevo horario:",
         "schedule_updated": "Tu horario se ha actualizado",
@@ -31,11 +35,14 @@ messages = {
         "delete_user": "¿Estás seguro de que deseas borrar tu usuario?",
         "deleted_user": "Usuario eliminado. Pulsa el botón de abajo para volver a registrarte.",
         'answered_question': "<b>❓ Pregunta</b>: {}\n<b>🙋 Respuesta</b>: {}",
-        "finish_answering": "Esas son todas las preguntas por hoy. ¡Gracias!"
+        "finish_answering": "Esas son todas las preguntas por hoy. ¡Gracias!",
+        "invalid_schedule": "{} no es un horario válido. Por favor, usa el formato HH:MM."
+
     },
     "GB": {
         "choose_gender": "Please choose your gender:",
         "choose_pic": "Please send a photo of yourself or send /skip if you don\'t want to.",
+        "choose_timezone": "Please send your location so that your timezone is detected.",
         "choose_schedule": "Please specify the time when you would like to receive questions in HH:MM format (24h).",
         "registration_ok": "You have been successfully registered into the system.",
         "exit_configurator": "Configurator has been closed.\nUse /config to open it again",
@@ -56,12 +63,16 @@ messages = {
         "current_schedule": current_template.format('schedule'),
         "change_schedule": new_template.format('schedule'),
         "schedule_updated": updated_template.format('schedule'),
+        "current_timezone": current_template.format('timezone'),
+        "change_timezone": "Send your location so that your timezone can be detected:",
+        "timezone_updated": updated_template.format('timezone'),
         "no_questions": "There are no questions for today. See you tomorrow!",
         "show_profile": "These are your profile data:\n<b>🔤 Name</b>: {}\n<b>🌈 Gender</b>: {}\n<b>🌐 Language</b>: {"
                         "}\n<b>⏰ Schedule</b>: {}",
         "delete_user": "Are you sure you want to delete your user?",
         "deleted_user": "Your user has been deleted. Press the button below to register again.",
         'answered_question': "<b>Question</b>: {}\n<b>Response</b>: {}",
-        "finish_answering": "You finished answering today's questions. Thanks!"
+        "finish_answering": "You finished answering today's questions. Thanks!",
+        "invalid_schedule": "{} is not a valid schedule. Please use HH:MM format."
     }
 }

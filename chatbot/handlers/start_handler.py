@@ -1,16 +1,16 @@
+import os
+
 from telegram import ReplyKeyboardRemove
 from telegram.ext import ConversationHandler, CommandHandler, MessageHandler, Filters, CallbackQueryHandler
 
+import chatbot.keyboards as keyboards
 from chatbot.config.messages import messages
 from chatbot.handlers import send_typing_action
-from chatbot.log.logger import logger
-import chatbot.keyboards as keyboards
-import manage
 from chatbot.jobs.PendingQuestionJob import PendingQuestionJob
-from django.contrib.auth.models import User
+from chatbot.log.logger import logger
 from howru_models.models import Patient, PendingQuestion, Doctor
 
-GENDER, PICTURE, LANGUAGE, SCHEDULE = range(4)
+GENDER, PICTURE, LANGUAGE, SCHEDULE, TIMEZONE = range(5)
 
 
 # noinspection PyProtectedMember
@@ -92,10 +92,12 @@ def picture(update, context):
     photo_file = update.message.photo[-1].get_file()
     pic_name = f'/opt/chatbot/chatbot/pics/{update.message.from_user.id}.jpg'
     photo_file.download(pic_name)
-    logger.info(f'User {update.message.from_user.username} sent picture {pic_name}')
-    update.message.reply_text(messages[patient.language]['choose_schedule'])
     patient.picture = pic_name
-    return SCHEDULE
+    os.remove(pic_name)
+    logger.info(f'User {update.message.from_user.username} sent picture {pic_name}')
+    context.bot.send_message(chat_id=patient.identifier, text=messages[patient.language]['choose_timezone'],
+                             reply_markup=keyboards.send_location_keyboard[patient.language])
+    return TIMEZONE
 
 
 @send_typing_action
@@ -106,10 +108,37 @@ def skip_picture(update, context):
     update.callback_query.answer()
 
     patient = context.user_data['patient']
-    logger.info(
-        f'User {patient.username} did not send a picture, using default')
+    logger.info(f'User {patient.username} did not send a picture, using default')
     patient.picture = '/opt/chatbot/chatbot/pics/default_profile_picture.png'
-    context.bot.send_message(chat_id=patient.identifier, text=messages[patient.language]['choose_schedule'])
+    context.bot.send_message(chat_id=patient.identifier, text=messages[patient.language]['choose_timezone'],
+                             reply_markup=keyboards.send_location_keyboard[patient.language])
+    return TIMEZONE
+
+
+@send_typing_action
+def timezone(update, context):
+    """
+    Gets the patient's timezone by analyzing the sent location
+    """
+    patient = context.user_data['patient']
+    patient_timezone = Patient.get_timezone_from_location(update.message.location)
+    logger.info(f'User {patient.username} choose timezone {patient_timezone}')
+    patient.timezone = patient_timezone
+    context.bot.send_message(chat_id=patient.identifier, text=messages[patient.language]['choose_schedule'],
+                             reply_markup=ReplyKeyboardRemove())
+    return SCHEDULE
+
+
+def default_timezone(update, context):
+    """
+    Sets default timezone to a patient (Europe/Madrid)
+    """
+    update.callback_query.answer()
+    patient = context.user_data['patient']
+    logger.info(f'Set default timezone (Europe/Madrid) for user {patient.username}')
+    patient.timezone = "Europe/Madrid"
+    context.bot.send_message(chat_id=patient.identifier, text=messages[patient.language]['choose_schedule'],
+                             reply_markup=ReplyKeyboardRemove())
     return SCHEDULE
 
 
@@ -169,6 +198,10 @@ start_handler = ConversationHandler(
         ],
         PICTURE: [
             MessageHandler(Filters.photo, picture), CallbackQueryHandler(skip_picture, pattern="^skip$")
+        ],
+        TIMEZONE: [
+            MessageHandler(Filters.location, timezone),
+            CallbackQueryHandler(default_timezone, pattern="^default-timezone$")
         ],
         SCHEDULE: [
             MessageHandler(Filters.regex('^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$'), schedule)
