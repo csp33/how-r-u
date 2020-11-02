@@ -1,5 +1,6 @@
 from base64 import b64encode
 
+import pytz
 from django.contrib.auth.models import User
 from django.db import models
 from django.db.models.signals import post_save
@@ -86,12 +87,15 @@ class Patient(models.Model):
 
     @property
     def schedule(self):
-        return self._schedule
+        schedule = self._schedule
+        if schedule.tzinfo == pytz.utc:
+            # TODO add timezone here
+            schedule = UTCTime.to_locale(schedule)
+        return schedule
 
     @schedule.setter
     def schedule(self, value):
-        utc_result = UTCTime.str_to_localized_datetime(value)
-        self._schedule = utc_result
+        self._schedule = UTCTime.str_to_localized_datetime(value)
 
     @property
     def gender(self):

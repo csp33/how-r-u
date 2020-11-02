@@ -1,6 +1,7 @@
 import time
 from datetime import datetime, timedelta
 
+import pytz
 from telegram import ReplyKeyboardRemove
 from telegram.ext import ConversationHandler
 
@@ -59,7 +60,7 @@ class PendingQuestionJob(object):
 
     def _create_job(self, context):
         context.job_queue.run_daily(callback=self.job_callback,
-                                    time=self.patient._schedule,
+                                    time=self.patient.schedule,
                                     name=f'{self.patient.identifier}_pending_questions_job')
 
     @staticmethod

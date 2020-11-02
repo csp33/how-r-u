@@ -11,21 +11,28 @@ from howru_models.models import Patient
 
 
 def main():
-    logger.info("Started HOW-R-U psychologist")
-    # Initialize bot
     updater = Updater(token=bot_config.TOKEN, use_context=True)
+
+    logger.info("Started HOW-R-U psychologist")
+
+    # Initialize bot
     dispatcher = updater.dispatcher
     handlers = [start_handler, config_handler, question_handler]
+
     # Add handlers to dispatcher
     for handler in handlers:
         dispatcher.add_handler(handler)
+
     # Add error callback
     dispatcher.add_error_handler(error_callback)
+
     # Start bot service
     updater.start_polling()
+
     # Restore bot jobs
     for patient in Patient.objects.all():
         PendingQuestionJob(context=updater, patient=patient)
+
     updater.idle()
 
 

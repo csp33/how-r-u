@@ -1,5 +1,5 @@
 from telegram import ReplyKeyboardRemove
-from telegram.ext import ConversationHandler, CommandHandler, MessageHandler, Filters
+from telegram.ext import ConversationHandler, CommandHandler, MessageHandler, Filters, CallbackQueryHandler
 
 from chatbot.config.messages import messages
 from chatbot.handlers import send_typing_action
@@ -9,34 +9,42 @@ import manage
 from chatbot.jobs.PendingQuestionJob import PendingQuestionJob
 from django.contrib.auth.models import User
 from howru_models.models import Patient, PendingQuestion, Doctor
-from howru_helpers import Flag
 
 GENDER, PICTURE, LANGUAGE, SCHEDULE = range(4)
 
 
+# noinspection PyProtectedMember
 @send_typing_action
 def start(update, context):
     """
     Shows welcome message and asks for language
     """
+    try:
+        # Try to answer query if the user is registering again
+        update.callback_query.answer()
+    except Exception:
+        pass
+
+    patient_id = update._effective_user.id
     # Check that user is not registered
     try:
-        patient = Patient.objects.get(identifier=update.message.from_user.id)
+        patient = Patient.objects.get(identifier=patient_id)
         logger.info(
-            f'User {update.message.from_user.username} tried to register again.')
-        update.message.reply_text(text=messages[patient.language]['already_exists'])
+            f'User {patient.username} tried to register again.')
+        context.bot.send_message(chat_id=patient_id, text=messages[patient.language]['already_exists'])
         return ConversationHandler.END
     except Patient.DoesNotExist:
         # The user should not exist in DB
-        context.user_data['patient'] = Patient(name=update.message.from_user.first_name,
-                                               identifier=str(update.message.from_user.id),
-                                               username=update.message.from_user.username)
+        context.user_data['patient'] = Patient(name=update._effective_user.first_name,
+                                               identifier=str(patient_id),
+                                               username=update._effective_user.username)
 
-    logger.info(f'User {update.message.from_user.username} started a new conversation')
-    update.message.reply_text(text=f'Hi {update.message.from_user.first_name}. Welcome to HOW-R-U psychologist bot.\n'
-                                   f'Hola {update.message.from_user.first_name}. Bienvenido al bot psicólogo HOW-R-U')
-    update.message.reply_text(text=f'Please select a language:\nElija un idioma por favor:',
-                              reply_markup=keyboards.language_keyboard)
+    logger.info(f'User {update._effective_user.username} started a new conversation')
+    context.bot.send_message(chat_id=patient_id,
+                             text=f'Hi {update._effective_user.first_name}. Welcome to HOW-R-U psychologist bot.\n'
+                                  f'Hola {update._effective_user.first_name}. Bienvenido al bot psicólogo HOW-R-U')
+    context.bot.send_message(chat_id=patient_id, text=f'Please select a language:\nElija un idioma por favor:',
+                             reply_markup=keyboards.language_keyboard)
 
     return LANGUAGE
 
@@ -46,12 +54,15 @@ def language(update, context):
     """
     Processes language and asks for gender
     """
-    patient_language = update.message.text
+    update.callback_query.answer()
+
+    patient_language = update.callback_query.data
     patient = context.user_data['patient']
-    logger.info(f'User {update.message.from_user.username} chose language {patient_language}')
-    context.user_data['patient'].language = Flag.unflag(patient_language)
-    update.message.reply_text(text=messages[patient.language]['choose_gender'],
-                              reply_markup=keyboards.gender_keyboard[patient.language])
+    logger.info(f'User {patient.username} chose language {patient_language}')
+
+    context.user_data['patient'].language = patient_language
+    context.bot.send_message(chat_id=patient.identifier, text=messages[patient.language]['choose_gender'],
+                             reply_markup=keyboards.gender_keyboard[patient.language])
     return GENDER
 
 
@@ -60,11 +71,15 @@ def gender(update, context):
     """
     Processes gender and asks for picture
     """
+    update.callback_query.answer()
+
     patient = context.user_data['patient']
+    patient_gender = update.callback_query.data
     logger.info(
-        f'User {update.message.from_user.username} chose gender {update.message.text}')
-    update.message.reply_text(messages[patient.language]['choose_pic'], reply_markup=ReplyKeyboardRemove())
-    patient.gender = update.message.text
+        f'User {patient.username} chose gender {patient_gender}')
+    patient.gender = patient_gender
+    context.bot.send_message(chat_id=patient.identifier, text=messages[patient.language]['choose_pic'],
+                             reply_markup=keyboards.skip_keyboard[patient.language])
     return PICTURE
 
 
@@ -88,11 +103,13 @@ def skip_picture(update, context):
     """
     Sets default picture and asks for schedule
     """
+    update.callback_query.answer()
+
     patient = context.user_data['patient']
     logger.info(
-        f'User {update.message.from_user.username} did not send a picture, using default')
+        f'User {patient.username} did not send a picture, using default')
     patient.picture = '/opt/chatbot/chatbot/pics/default_profile_picture.png'
-    update.message.reply_text(messages[patient.language]['choose_schedule'])
+    context.bot.send_message(chat_id=patient.identifier, text=messages[patient.language]['choose_schedule'])
     return SCHEDULE
 
 
@@ -139,12 +156,23 @@ def finish(update, context):
 
 
 start_handler = ConversationHandler(
-    entry_points=[CommandHandler('start', start)],
+    entry_points=[
+        CommandHandler('start', start),
+        CallbackQueryHandler(start, pattern="^start$")
+    ],
     states={
-        LANGUAGE: [MessageHandler(Filters.regex(f'^({Flag.flag("es")}|{Flag.flag("gb")})$'), language)],
-        GENDER: [MessageHandler(Filters.regex('^(Male|Female|Other|Masculino|Femenino|Otro)$'), gender)],
-        PICTURE: [MessageHandler(Filters.photo, picture), CommandHandler('skip', skip_picture)],
-        SCHEDULE: [MessageHandler(Filters.regex('^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$'), schedule)]
+        LANGUAGE: [
+            CallbackQueryHandler(language, pattern='^(ES|GB)$')
+        ],
+        GENDER: [
+            CallbackQueryHandler(gender, pattern="^(Male|Female|Other)$")
+        ],
+        PICTURE: [
+            MessageHandler(Filters.photo, picture), CallbackQueryHandler(skip_picture, pattern="^skip$")
+        ],
+        SCHEDULE: [
+            MessageHandler(Filters.regex('^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$'), schedule)
+        ]
     },
     fallbacks=[],
     name="starter"
