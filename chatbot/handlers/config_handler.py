@@ -195,7 +195,8 @@ def view_profile(update, context):
     patient = context.user_data['patient']
     message = messages[patient.language]['show_profile'].format(patient.name, patient.gender,
                                                                 patient.get_language_display(),
-                                                                patient.schedule.strftime('%H:%M'))
+                                                                patient.schedule.strftime('%H:%M'),
+                                                                patient.timezone)
     context.bot.send_message(chat_id=patient.identifier, text=message, parse_mode=ParseMode.HTML)
     return config_menu(update, context)
 
@@ -279,7 +280,7 @@ def ask_change_timezone(update, context):
     context.bot.send_message(chat_id=patient.identifier,
                              text=messages[patient.language]['current_timezone'] + current_timezone)
     context.bot.send_message(chat_id=patient.identifier, text=messages[patient.language]['change_timezone'],
-                             reply_markup=keyboards.back_keyboard[patient.language])
+                             reply_markup=keyboards.change_timezone_keyboard[patient.language])
     return PROCESS_TIMEZONE
 
 
@@ -290,8 +291,24 @@ def process_change_timezone(update, context):
     """
     patient = context.user_data['patient']
     patient_timezone = Patient.get_timezone_from_location(update.message.location)
-
+    patient.timezone = patient_timezone
+    patient.save(update_fields=["timezone"])
     logger.info(f'User {patient.username} choose timezone {patient_timezone}')
+    context.bot.send_message(chat_id=patient.identifier, text=messages[patient.language]['timezone_updated'])
+
+    return config_menu(update, context)
+
+
+@send_typing_action
+def default_timezone(update, context):
+    """
+    Sets default timezone to a patient (Europe/Madrid)
+    """
+    update.callback_query.answer()
+    patient = context.user_data['patient']
+    logger.info(f'Set default timezone (Europe/Madrid) for user {patient.username}')
+    patient.timezone = "Europe/Madrid"
+    patient.save(update_fields=["timezone"])
     context.bot.send_message(chat_id=patient.identifier, text=messages[patient.language]['timezone_updated'])
 
     return config_menu(update, context)
@@ -380,11 +397,14 @@ config_handler = ConversationHandler(
             MessageHandler(~Filters.regex('^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$'), process_wrong_schedule)
         ],
         PROCESS_TIMEZONE: [
-            MessageHandler(Filters.location, process_change_timezone)
+            MessageHandler(Filters.location, process_change_timezone),
+            CallbackQueryHandler(default_timezone, pattern="^default-timezone$")
         ]
 
     },
-    fallbacks=[CallbackQueryHandler(back, pattern="^back$"),
-               CallbackQueryHandler(_exit, pattern="^exit$")],
+    fallbacks=[
+        CallbackQueryHandler(back, pattern="^back$"),
+        CallbackQueryHandler(_exit, pattern="^exit$")
+    ],
     name="configurator"
 )

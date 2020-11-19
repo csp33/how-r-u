@@ -128,7 +128,7 @@ def timezone(update, context):
                              reply_markup=ReplyKeyboardRemove())
     return SCHEDULE
 
-
+@send_typing_action
 def default_timezone(update, context):
     """
     Sets default timezone to a patient (Europe/Madrid)
