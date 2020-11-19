@@ -5,7 +5,8 @@ from django.shortcuts import render, redirect
 
 # Create your views here.
 from .forms import QuestionForm
-from .models import Question, PendingQuestion
+from howru_models.models import Question, PendingQuestion
+
 
 def save_question(form, doctor):
     """
@@ -141,8 +142,10 @@ def delete(request, question_id):
     question = Question.objects.get(id=question_id)
     context = {"question": question}
     if request.method == "POST":
-        question.delete()
         request.user.doctor.assigned_questions.remove(question)
+        if question.creator == request.user.doctor:
+            question.delete()
+
         request.session['message'] = f'Question {question} has been successfully deleted'
         page = request.session.pop('my_questions_page', 1)
         return redirect(f'/questions_manager/my_questions?page={page}')

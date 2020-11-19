@@ -3,8 +3,7 @@ from datetime import datetime
 import pytz
 
 
-
-def get_utc_result(value, timezone='Europe/Madrid'):
+def str_to_localized_datetime(value, timezone='Europe/Madrid'):
     # Get full datetime
     dt = datetime.today()
     tmp = datetime.strptime(value, '%H:%M')
