@@ -1,21 +1,27 @@
 from base64 import b64encode
 
+import pytz
 from django.contrib.auth.models import User
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 # noinspection PyUnresolvedReferences
 from django_better_admin_arrayfield.models.fields import ArrayField
+from timezonefinder import TimezoneFinder
 
 from howru_helpers import UTCTime
+
+tf = TimezoneFinder()
 
 
 class Response(models.Model):
     text = models.CharField(max_length=100)
     order = models.IntegerField(null=False)
     question = models.ForeignKey('Question', on_delete=models.CASCADE)
+
     def __str__(self):
         return self.text
+
 
 class Question(models.Model):
     text = models.CharField(max_length=100)
@@ -58,12 +64,24 @@ class Patient(models.Model):
     _picture = models.BinaryField(blank=True, db_column="picture")
     _gender = models.CharField(choices=[("M", "Male"), ("F", "Female"), ("O", "Other")], max_length=1,
                                db_column="gender", null=True)
+    timezone = models.CharField(max_length=50, default="Europe/Madrid")
     language = models.CharField(choices=[("GB", "English"), ("ES", "Spanish")], max_length=2)
     username = models.CharField(max_length=20, null=True)
     _schedule = models.DateTimeField(
         db_column="schedule"
     )
     assigned_doctors = models.ManyToManyField(Doctor, blank=True)
+
+    GENDER_MAPPING = {
+        "M": {"ES": "Masculino", "GB": "Male"},
+        "F": {"ES": "Femenino", "GB": "Female"},
+        "O": {"ES": "Otro", "GB": "Other"},
+    }
+
+    @classmethod
+    def get_timezone_from_location(cls, location):
+        latitude, longitude = location['latitude'], location['longitude']
+        return tf.timezone_at(lng=longitude, lat=latitude)
 
     def __str__(self):
         return self.username
@@ -78,21 +96,18 @@ class Patient(models.Model):
 
     @property
     def schedule(self):
-        return self._schedule
+        schedule = self._schedule
+        if schedule.tzinfo == pytz.utc:
+            schedule = UTCTime.to_locale(time=schedule, timezone=self.timezone)
+        return schedule
 
     @schedule.setter
     def schedule(self, value):
-        utc_result = UTCTime.get_utc_result(value)
-        self._schedule = utc_result
+        self._schedule = UTCTime.str_to_localized_datetime(value, timezone=self.timezone)
 
     @property
     def gender(self):
-        GENDER_MAPPING = {
-            "M": {"ES": "Masculino", "GB": "Male"},
-            "F": {"ES": "Femenino", "GB": "Female"},
-            "O": {"ES": "Otro", "GB": "Other"},
-        }
-        return GENDER_MAPPING[self._gender][self.language]
+        return self.GENDER_MAPPING[self._gender][self.language]
 
     @gender.setter
     def gender(self, value):
@@ -124,6 +139,7 @@ class PendingQuestion(JournalEntry):
 class AnsweredQuestion(JournalEntry):
     answer_date = models.DateTimeField()
     response = models.ForeignKey(Response, on_delete=models.CASCADE)
+
     def __str__(self):
         base = str(super())
         return f'{base} - {self.response} - {self.answer_date}'

@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 # Register your models here.
-from web_interface.questions_manager.models import AnsweredQuestion, PendingQuestion, Question, Response
+from howru_models.models import AnsweredQuestion, PendingQuestion, Question, Response
 from django_better_admin_arrayfield.admin.mixins import DynamicArrayMixin
 
 class QuestionAdmin(admin.ModelAdmin, DynamicArrayMixin):
