@@ -31,7 +31,7 @@ messages = {
         "language_updated": "Tu idioma se ha actualizado.",
         "no_questions": "No hay preguntas para hoy. ¡Nos vemos mañana!",
         "show_profile": "Estos son los datos de tu perfil:\n<b>🔤 Nombre</b>: {}\n<b>🌈 Género</b>: {}\n<b>"
-                        "🌐 Idioma</b>: {}\n<b>⏰ Horario</b>: {}",
+                        "🌐 Idioma</b>: {}\n<b>⏰ Horario</b>: {}\n<b>📍 Zona horaria</b>: {}",
         "delete_user": "¿Estás seguro de que deseas borrar tu usuario?",
         "deleted_user": "Usuario eliminado. Pulsa el botón de abajo para volver a registrarte.",
         'answered_question': "<b>❓ Pregunta</b>: {}\n<b>🙋 Respuesta</b>: {}",
@@ -68,7 +68,7 @@ messages = {
         "timezone_updated": updated_template.format('timezone'),
         "no_questions": "There are no questions for today. See you tomorrow!",
         "show_profile": "These are your profile data:\n<b>🔤 Name</b>: {}\n<b>🌈 Gender</b>: {}\n<b>🌐 Language</b>: {"
-                        "}\n<b>⏰ Schedule</b>: {}",
+                        "}\n<b>⏰ Schedule</b>: {}\n<b>📍 Timezone</b>: {}",
         "delete_user": "Are you sure you want to delete your user?",
         "deleted_user": "Your user has been deleted. Press the button below to register again.",
         'answered_question': "<b>Question</b>: {}\n<b>Response</b>: {}",

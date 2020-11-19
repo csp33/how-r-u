@@ -35,6 +35,30 @@ gender_keyboard = {
     )
 }
 
+change_timezone_keyboard = {
+    'ES': InlineKeyboardMarkup([
+        [
+            InlineKeyboardButton("📍 Usar la zona horaria por defecto (Europa/Madrid)",
+                                 callback_data="default-timezone")
+        ],
+        [
+            InlineKeyboardButton("🔙 Atrás", callback_data="back"),
+        ]
+    ]
+    ),
+
+    'GB': InlineKeyboardMarkup([
+        [
+            InlineKeyboardButton("📍 Use the default timezone (Europa/Madrid)",
+                                 callback_data="default-timezone")
+        ],
+        [
+            InlineKeyboardButton("🔙 Back", callback_data="back"),
+        ]
+    ]
+    )
+}
+
 send_location_keyboard = {
     'ES': InlineKeyboardMarkup([
         [
