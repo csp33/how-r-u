@@ -1,0 +1,13 @@
+[Unit]
+Description=HOW-R-U Web Interface
+After=network.target postgreql.service apache2.service
+StartLimitIntervalSec=0
+[Service]
+Type=simple
+Restart=always
+RestartSec=1
+User=root
+Environment=PYTHONPATH=/projects/how-r-u/web_interface
+ExecStart=/projects/how-r-u/web_interface/venv/bin/gunicorn web_interface.core.wsgi:application --pythonpath /projects/how-r-u -c /projects/how-r-u/web_interface/gunicorn_config.py
+[Install]
+WantedBy=multi-user.target
