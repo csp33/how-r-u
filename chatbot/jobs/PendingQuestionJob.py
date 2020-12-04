@@ -90,17 +90,21 @@ class PendingQuestionJob(object):
                 pending_questions.append(pending_question)
             else:
                 # As only_once questions are only added in the first if, they won't be added again
+
                 last_answer_date = answered[0].answer_date
                 now = datetime.now()
+                # Get answer dates without time
+
                 today = datetime(now.year, now.month, now.day)
-                if pending_question.question.frequency == "D" and last_answer_date.day < today.day:
+                last_answer = datetime(last_answer_date.year, last_answer_date.month, last_answer_date.day)
+
+                if pending_question.question.frequency == "D" and (today - last_answer).days >= 1:
                     # Daily
                     pending_questions.append(pending_question)
-                if pending_question.question.frequency == "W" and last_answer_date.weekday == today.weekday:
+                if pending_question.question.frequency == "W" and (today - last_answer).days >= 7:
                     # Weekly
                     pending_questions.append(pending_question)
-                elif pending_question.question.frequency == "M" and last_answer_date.month < today.month \
-                        and last_answer_date.day == today.day:
+                elif pending_question.question.frequency == "M" and (today - last_answer).days >= 30:
                     # Monthly
                     pending_questions.append(pending_question)
         return pending_questions
