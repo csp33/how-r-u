@@ -85,8 +85,14 @@ def get_answers_per_hour(doctor):
     return result
 
 
-@login_required(login_url="/login/")
 def index(request):
+    return render(request, "index.html")
+
+def about_me(request):
+    return render(request, "about_me.html")
+
+@login_required
+def dashboard(request):
     """
     Shows the index page, including global parameters
     (top patients, number of associated patients, answers, gender and time percentages, etc.)
@@ -110,4 +116,4 @@ def index(request):
         "other_percentage": other_percentage,
         "answers_per_hour": answers_per_hour
     }
-    return render(request, "index.html", context)
+    return render(request, "dashboard.html", context)

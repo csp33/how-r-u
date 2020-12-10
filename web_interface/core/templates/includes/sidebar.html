@@ -7,7 +7,7 @@
                                                                                             width="118">
     </div>
     <ul class="c-sidebar-nav">
-        <li class="c-sidebar-nav-item"><a class="c-sidebar-nav-link" href="/">
+        <li class="c-sidebar-nav-item"><a class="c-sidebar-nav-link" href="{% url 'home' %}">
             <svg class="c-sidebar-nav-icon">
                 <use xlink:href="/static/assets/vendors/@coreui/icons/svg/free.svg#cil-home"></use>
             </svg>
@@ -23,15 +23,15 @@
             Questions manager</a>
             <ul class="c-sidebar-nav-dropdown-items">
                 <li class="c-sidebar-nav-item"><a class="c-sidebar-nav-link"
-                                                  href="/questions_manager/public_questions/"><span
+                                                  href="{% url 'public_questions' %}"><span
                         class="c-sidebar-nav-icon"></span> Public questions</a></li>
                 <li class="c-sidebar-nav-item"><a class="c-sidebar-nav-link"
-                                                  href="/questions_manager/my_questions/"><span
+                                                  href="{% url 'my_questions' %}"><span
                         class="c-sidebar-nav-icon"></span> My questions</a></li>
             </ul>
         </li>
 
-        <li class="c-sidebar-nav-item"><a class="c-sidebar-nav-link" href="/patients_manager">
+        <li class="c-sidebar-nav-item"><a class="c-sidebar-nav-link" href="{% url 'patients_index' %}">
             <svg class="c-sidebar-nav-icon">
                 <use xlink:href="/static/assets/vendors/@coreui/icons/svg/free.svg#cil-smile"></use>
             </svg>
@@ -46,7 +46,7 @@
             My account</a>
             <ul class="c-sidebar-nav-dropdown-items">
                 <li class="c-sidebar-nav-item">
-                    <a class="c-sidebar-nav-link" href="/change_password/">
+                    <a class="c-sidebar-nav-link" href="{% url 'change_password' %}">
                         <svg class="c-sidebar-nav-icon">
                             <use xlink:href="/static/assets/vendors/@coreui/icons/svg/free.svg#cil-lock-locked"></use>
                         </svg>
@@ -54,7 +54,7 @@
                     </a>
                 </li>
                 <li class="c-sidebar-nav-item">
-                    <a class="c-sidebar-nav-link" href="/delete_account/">
+                    <a class="c-sidebar-nav-link" href="{% url 'delete_account' %}">
                         <svg class="c-sidebar-nav-icon">
                             <use xlink:href="/static/assets/vendors/@coreui/icons/svg/free.svg#cil-x-circle"></use>
                         </svg>
@@ -213,7 +213,7 @@
         ---->
         <li class="c-sidebar-nav-item mt-auto">
             <a class="c-sidebar-nav-link c-sidebar-nav-link-success"
-               href="https://github.com/csp98/TFG1920"
+               href="https://github.com/csp98/how-r-u"
                target="_blank">
                 <svg class="c-sidebar-nav-icon">
                     <use xlink:href="/static/assets/vendors/@coreui/icons/svg/brand.svg#cib-github-alt"></use>
