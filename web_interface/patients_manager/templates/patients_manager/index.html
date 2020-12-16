@@ -22,7 +22,7 @@
             </div>
             {% endif %}
             <div class="card-body">
-                <a href="export/">
+                <a href="{% url 'export' %}">
                     <button class="btn btn-pill btn-primary" style="float: right;" type="button">
                         <svg class="c-icon">
                             <use xlink:href="/static/assets/vendors/@coreui/icons/svg/free.svg#cil-save"></use>
@@ -115,18 +115,18 @@
                             {{ patient|get_latest_answer_time }}
                         </td>
                         <td style="text-align: center; vertical-align: middle;">
-                            <a href="/patients_manager/view_data/{{patient.identifier}}/">
+                            <a href="{% url 'view_data' patient.identifier %}">
                                 <button class="btn btn-pill btn-success" type="button">
                                     📊 &nbsp; View data
                                 </button>
                             </a>
                             <br>
-                            <a href="/patients_manager/assign_questions/{{patient.identifier}}/">
+                            <a href="{% url 'assign_questions' patient.identifier %}">
                                 <button class="btn btn-pill btn-info" style="margin:5px;" type="button">
                                     &#128172; &nbsp; Assign questions
                                 </button>
                             </a>
-                            <a href="/patients_manager/unassign/{{patient.identifier}}/">
+                            <a href="{% url 'unassign' patient.identifier %}">
                                 <button class="btn btn-pill btn-warning" style="margin:5px;" type="button">
                                     &#10060; &nbsp; Delete patient
                                 </button>
@@ -160,7 +160,7 @@
                 </ul>
                 {% endif %}
                 {% endif %}
-                <a href="/patients_manager/assign">
+                <a href="{% url 'assign' %}">
                     <button class="btn btn-pill btn-block btn-primary" type="button">
                         <svg class="c-icon">
                             <use xlink:href="/static/assets/vendors/@coreui/icons/svg/free.svg#cil-plus"></use>

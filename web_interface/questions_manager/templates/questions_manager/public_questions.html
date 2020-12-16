@@ -99,7 +99,7 @@
                                 Added
                             </button>
                             {% else %}
-                            <a href="/questions_manager/assign/{{question.id}}">
+                            <a href="{% url 'assign_question' question.id %}">
                                 <button class="btn btn-pill btn-primary" type="button">
                                     <svg class="c-icon">
                                         <use xlink:href="/static/assets/vendors/@coreui/icons/svg/free.svg#cil-clone"></use>

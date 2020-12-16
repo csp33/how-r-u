@@ -8,6 +8,8 @@ from django.contrib.auth import authenticate, login, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import PasswordChangeForm
 from django.shortcuts import render, redirect
+from django.urls import reverse
+
 from howru_models.models import Patient
 
 from .forms import LoginForm, SignUpForm
@@ -25,12 +27,11 @@ def login_view(request):
             user = authenticate(username=username, password=password)
             if user is not None:
                 login(request, user)
-                return redirect("/")
+                return redirect(reverse("dashboard"))
             else:
                 correct_credentials = False
 
-    return render(request, "accounts/login.html",
-                  {"form": form, 'correct_credentials': correct_credentials})
+    return render(request, "accounts/login.html", {"form": form, 'correct_credentials': correct_credentials})
 
 
 def register_user(request):
@@ -48,14 +49,14 @@ def register_user(request):
             raw_password = form.cleaned_data.get("password1")
             user = authenticate(username=username, password=raw_password)
             login(request, user)
-            return redirect("/")
+            return redirect(reverse("dashboard"))
     else:
         form = SignUpForm()
 
     return render(request, "accounts/register.html", {"form": form})
 
 
-@login_required(login_url="/login/")
+@login_required
 def change_password(request):
     """
     Allows an user to change his/her password
@@ -74,7 +75,7 @@ def change_password(request):
         'success': success
     })
 
-@login_required(login_url="/login/")
+@login_required
 def delete_account(request):
     """
     Deletes a doctor from the system
@@ -82,6 +83,6 @@ def delete_account(request):
     if request.method == "POST":
         request.user.doctor.delete()
         request.user.delete()
-        return redirect('/')
+        return redirect('home')
     context = {}
     return render(request, 'delete_account.html', context)

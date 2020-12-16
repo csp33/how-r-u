@@ -12,7 +12,7 @@
             {% endif %}
             <div class="card-body">
                 <div class="col-md-12">
-                    <form action="/patients_manager/assign/" class="form-horizontal"
+                    <form action="{% url 'assign' %}" class="form-horizontal"
                           enctype="multipart/form-data"
                           method="post">
                         {% csrf_token %}

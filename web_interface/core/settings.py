@@ -20,7 +20,6 @@ DEBUG = True
 # load production server from .env
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0']
 
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -50,7 +49,8 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'web_interface.core.urls'
-LOGIN_REDIRECT_URL = "home"  # Route defined in app/urls.py
+LOGIN_URL = "login"
+LOGIN_REDIRECT_URL = "dashboard"  # Route defined in app/urls.py
 LOGOUT_REDIRECT_URL = "home"  # Route defined in app/urls.py
 
 TEMPLATES = [
@@ -134,6 +134,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.9/howto/static-files/
 STATIC_ROOT = BASE_DIR + '/staticfiles'
 STATIC_URL = '/static/'
+MEDIA_URL = '/media/'
 
 # Extra places for collectstatic to find static files.
 STATICFILES_DIRS = (

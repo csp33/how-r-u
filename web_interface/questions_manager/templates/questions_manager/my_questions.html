@@ -101,18 +101,18 @@
                         </td>
                         <td style="text-align: center; vertical-align: middle;">
                             {% if question.creator.user.username != request.user.username %}
-                                <a href="/questions_manager/delete/{{question.id}}">
+                                <a href="{% url 'delete_question' question.id %}">
                                     <button class="btn btn-pill btn-warning" style="margin:5px;" type="button">
                                         &#10060; &nbsp; Delete from my questions
                                     </button>
                                 </a>
                             {% else %}
-                                <a href="/questions_manager/modify/{{question.id}}">
+                                <a href="{% url 'modify_question' question.id %}">
                                     <button class="btn btn-pill btn-info" style="margin:5px;" type="button">
                                         &#128221; &nbsp; Modify
                                     </button>
                                 </a>
-                                <a href="/questions_manager/delete/{{question.id}}">
+                                <a href="{% url 'delete_question' question.id %}">
                                     <button class="btn btn-pill btn-warning" style="margin:5px;" type="button">
                                         &#10060; &nbsp; Delete
                                     </button>
@@ -147,7 +147,7 @@
                 </ul>
                 {% endif %}
                 {% endif %}
-                <a href="/questions_manager/create">
+                <a href="{% url 'create_question' %}">
                     <button class="btn btn-pill btn-block btn-primary" type="button">
                         <svg class="c-icon">
                             <use xlink:href="/static/assets/vendors/@coreui/icons/svg/free.svg#cil-plus"></use>

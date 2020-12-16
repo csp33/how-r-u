@@ -11,11 +11,11 @@ RUN pip3.6 install ipython
 
 # Set PYTHONPATH
 
-ENV PYTHONPATH /opt/chatbot
+ENV PYTHONPATH /projects/how-r-u
 
 # Run bot
 
-WORKDIR /opt/chatbot
+WORKDIR /projects/how-r-u
 CMD python3 manage.py makemigrations && \
     python3 manage.py migrate && \
     python3 chatbot/src/bot.py

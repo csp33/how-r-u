@@ -90,7 +90,7 @@ def picture(update, context):
     """
     patient = context.user_data['patient']
     photo_file = update.message.photo[-1].get_file()
-    pic_name = f'/opt/chatbot/chatbot/pics/{update.message.from_user.id}.jpg'
+    pic_name = f'/projects/how-r-u/chatbot/pics/{update.message.from_user.id}.jpg'
     photo_file.download(pic_name)
     patient.picture = pic_name
     os.remove(pic_name)
@@ -109,7 +109,7 @@ def skip_picture(update, context):
 
     patient = context.user_data['patient']
     logger.info(f'User {patient.username} did not send a picture, using default')
-    patient.picture = '/opt/chatbot/chatbot/pics/default_profile_picture.png'
+    patient.picture = '/projects/how-r-u/chatbot/pics/default_profile_picture.png'
     context.bot.send_message(chat_id=patient.identifier, text=messages[patient.language]['choose_timezone'],
                              reply_markup=keyboards.send_location_keyboard[patient.language])
     return TIMEZONE

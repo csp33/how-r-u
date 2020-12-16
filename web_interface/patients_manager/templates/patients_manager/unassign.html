@@ -17,7 +17,7 @@
                         {% csrf_token %}
                         <div class="text-center">
                             <button class="btn btn-sm btn-danger" name="login" type="submit">Confirm</button>
-                            <a href="/patients_manager/">
+                            <a href="{% url 'patients_index' %}">
                                 <button class="btn btn-sm btn-primary" type="button"> Back</button>
                             </a>
                         </div>
