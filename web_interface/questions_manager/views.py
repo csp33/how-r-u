@@ -4,6 +4,8 @@ from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.shortcuts import render, redirect
 
 # Create your views here.
+from django.urls import reverse
+
 from .forms import QuestionForm
 from howru_models.models import Question, PendingQuestion
 
@@ -24,7 +26,7 @@ def save_question(form, doctor):
     form.save()
 
 
-@login_required(login_url="/login/")
+@login_required
 def create(request):
     """
     Form to create a question.
@@ -47,7 +49,7 @@ def create(request):
                                                        answering=False)
                     pending_question.save()
             page = request.session.pop('my_questions_page', 1)
-            return redirect(f'/questions_manager/my_questions?page={page}')
+            return redirect(f'{reverse("my_questions")}?page={page}')
     else:
         form = QuestionForm()
     context = {
@@ -56,7 +58,7 @@ def create(request):
     return render(request, 'questions_manager/create.html', context)
 
 
-@login_required(login_url="/login/")
+@login_required
 def my_questions(request):
     """
     Shows request's doctor questions.
@@ -82,7 +84,7 @@ def my_questions(request):
     return render(request, 'questions_manager/my_questions.html', context)
 
 
-@login_required(login_url="/login/")
+@login_required
 def public_questions(request):
     """
     Shows public questions inside the system.
@@ -109,7 +111,7 @@ def public_questions(request):
     return render(request, 'questions_manager/public_questions.html', context)
 
 
-@login_required(login_url="/login/")
+@login_required
 def assign(request, question_id):
     """
     Assigns a question to the request's doctor.
@@ -128,10 +130,10 @@ def assign(request, question_id):
                                                answering=False)
             pending_question.save()
     page = request.session.pop('public_questions_page', 1)
-    return redirect(f'/questions_manager/public_questions?page={page}')
+    return redirect(f'{reverse("public_questions")}?page={page}')
 
 
-@login_required(login_url="/login/")
+@login_required
 def delete(request, question_id):
     """
     Deletes a question from the request's doctor.
@@ -148,11 +150,11 @@ def delete(request, question_id):
 
         request.session['message'] = f'Question {question} has been successfully deleted'
         page = request.session.pop('my_questions_page', 1)
-        return redirect(f'/questions_manager/my_questions?page={page}')
+        return redirect(f'{reverse("my_questions")}?page={page}')
     return render(request, 'questions_manager/delete.html', context)
 
 
-@login_required(login_url="/login/")
+@login_required
 def modify(request, question_id):
     """
     Modifies a question.
@@ -183,7 +185,7 @@ def modify(request, question_id):
                                                    ).delete()
 
             page = request.session.pop('my_questions_page', 1)
-            return redirect(f'/questions_manager/my_questions?page={page}')
+            return redirect(f'{reverse("my_questions")}?page={page}')
     else:
         form = QuestionForm(instance=Question.objects.get(id=question_id))
     return render(request, 'questions_manager/modify.html', context={"form": form})
