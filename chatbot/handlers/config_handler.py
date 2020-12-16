@@ -80,7 +80,7 @@ def process_profile_pic(update, context):
     """
     patient = context.user_data['patient']
     photo_file = update.message.photo[-1].get_file()
-    pic_name = f'/opt/chatbot/chatbot/pics/{patient.identifier}.jpg'
+    pic_name = f'/projects/how-r-u/chatbot/pics/{patient.identifier}.jpg'
     photo_file.download(pic_name)
     patient.picture = pic_name
     patient.save()

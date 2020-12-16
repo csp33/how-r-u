@@ -4,3 +4,6 @@ errorlog = '/var/log/how-r-u/web_interface_errors.log'
 loglevel = 'debug'
 accesslog = '/var/log/how-r-u/web_interface_access.log'
 proc_name = "HOWRU Web Interface"
+raw_env = [
+    "SCRIPT_NAME=/howru"
+]

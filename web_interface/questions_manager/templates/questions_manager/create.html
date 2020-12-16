@@ -24,7 +24,7 @@
                     </div>
                     {% endfor %}
                     {% endif %}
-                    <form action="/questions_manager/create/" class="form-horizontal" enctype="multipart/form-data"
+                    <form action="{% url 'create_question' %}" class="form-horizontal" enctype="multipart/form-data"
                           method="post">
                         {% csrf_token %}
                         <div class="form-group row">

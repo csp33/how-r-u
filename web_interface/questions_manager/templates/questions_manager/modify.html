@@ -28,7 +28,7 @@
                         <strong>Question has been successfully updated</strong>
                     </div>
                     {% endif %}
-                    <form action="/questions_manager/modify/{{form.instance.id}}/" class="form-horizontal"
+                    <form action="{% url 'modify_question' form.instance.id %}" class="form-horizontal"
                           enctype="multipart/form-data"
                           method="post">
                         {% csrf_token %}

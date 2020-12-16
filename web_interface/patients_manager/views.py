@@ -8,6 +8,7 @@ from django.db.models import Count, CharField, Value
 from django.db.models.functions import Cast, ExtractDay, ExtractMonth, ExtractYear, Concat
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
+from django.urls import reverse
 
 from howru_models.models import Patient, PendingQuestion
 from web_interface.patients_manager.forms import AssignPatientForm, ExportForm
@@ -16,7 +17,7 @@ from web_interface.patients_manager.forms import AssignPatientForm, ExportForm
 # Create your views here.
 
 
-@login_required(login_url="/login/")
+@login_required
 def index(request):
     """
     Shows all assigned patients from the request's doctor. Allows pagination.
@@ -47,7 +48,7 @@ def index(request):
     return render(request, 'patients_manager/index.html', context)
 
 
-@login_required(login_url="/login/")
+@login_required
 def assign(request):
     """
     Assigns a patient to the request's doctor.
@@ -75,7 +76,7 @@ def assign(request):
                         pending.save()
                     request.session['message'] = f'Patient {username} has been successfully added'
                 page = request.session.pop('patients_page', 1)
-                return redirect(f'/patients_manager?page={page}')
+                return redirect(f'{reverse("patients_index")}?page={page}')
             except Patient.DoesNotExist:
                 not_found = True
     else:
@@ -83,7 +84,7 @@ def assign(request):
     return render(request, 'patients_manager/assign.html', context={"form": form, "not_found": not_found})
 
 
-@login_required(login_url="/login/")
+@login_required
 def unassign(request, patient_id):
     """
     Removes a patient from request's doctor assigned patients
@@ -97,11 +98,12 @@ def unassign(request, patient_id):
         pending = PendingQuestion.objects.filter(patient=patient, doctor=request.user.doctor).delete()
         request.session['message'] = f'Patient {patient} has been successfully deleted'
         page = request.session.pop('patients_page', 1)
-        return redirect(f'/patients_manager?page={page}')
+        # FIXME
+        return redirect(f'{reverse("patients_index")}?page={page}')
     return render(request, 'patients_manager/unassign.html', context)
 
 
-@login_required(login_url="/login/")
+@login_required
 def assign_questions(request, patient_id):
     """
     Shows request's doctor questions that can be assigned to the patient.
@@ -127,7 +129,7 @@ def assign_questions(request, patient_id):
     return render(request, 'patients_manager/assign_questions.html', context)
 
 
-@login_required(login_url="/login/")
+@login_required
 def assign_question_to_patient(request, question_id, patient_id):
     """
     Assigns a question to a patient bu creating a PendingQuestion
@@ -141,10 +143,10 @@ def assign_question_to_patient(request, question_id, patient_id):
     pending_question.save()
     # request.session['message'] = "Question successfully assigned to patient"
     page = request.session.pop('patient_questions_page', 1)
-    return redirect(f'/patients_manager/assign_questions/{patient_id}?page={page}')
+    return redirect(f'{reverse("assign_questions")}/{patient_id}?page={page}')
 
 
-@login_required(login_url="/login/")
+@login_required
 def unassign_question_to_patient(request, question_id, patient_id):
     """
     Unassigns a question to a patient by removing the corresponding PendingQuestion
@@ -156,10 +158,10 @@ def unassign_question_to_patient(request, question_id, patient_id):
     pending_question.delete()
     # request.session['message'] = "Question successfully unassigned to patient"
     page = request.session.pop('patient_questions_page', 1)
-    return redirect(f'/patients_manager/assign_questions/{patient_id}?page={page}')
+    return redirect(f'{reverse("assign_questions")}/{patient_id}?page={page}')
 
 
-@login_required(login_url="/login/")
+@login_required
 def view_data(request, patient_id):
     """
     Shows answered questions data from a patient.
@@ -248,7 +250,7 @@ def patients_to_csv(patients, doctor, start_date, end_date):
         return response, file_path
 
 
-@login_required(login_url="/login/")
+@login_required
 def export(request):
     """
     Allows to select desired patients and start/end date to download a CSV file with all the information
